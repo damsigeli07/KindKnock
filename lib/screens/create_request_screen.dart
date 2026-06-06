@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CreateRequestScreen extends StatefulWidget {
-  const CreateRequestScreen({Key? key}) : super(key: key);
+  final String userId;
+  final String displayName;
+
+  const CreateRequestScreen({
+    super.key,
+    required this.userId,
+    required this.displayName,
+  });
 
   @override
   State<CreateRequestScreen> createState() => _CreateRequestScreenState();
@@ -18,9 +25,8 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
     final description = _descriptionController.text.trim();
 
     if (title.isEmpty || description.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Fill all fields')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Fill all fields')));
       return;
     }
 
@@ -30,7 +36,8 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
       await FirebaseFirestore.instance.collection('help_requests').add({
         'title': title,
         'description': description,
-        'requester_id': 'demo-user',
+        'requester_id': widget.userId,
+        'requester_display_name': widget.displayName,
         'status': 'open',
         'created_at': Timestamp.now(),
         'volunteer_id': null,
@@ -40,9 +47,8 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
         Navigator.pop(context);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error: $e')));
     }
 
     setState(() => _isLoading = false);
@@ -86,5 +92,12 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 }
