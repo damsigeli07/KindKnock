@@ -4,15 +4,17 @@ import 'create_request_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
+  String _formatTime(Timestamp? ts) {
+    if (ts == null) return '';
+    return '${ts.toDate().hour}:${ts.toDate().minute}';
+  }
 
   @override
   Widget build(BuildContext context) {
     const userId = "demo-user"; // Mock user for now
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('KindKnock'),
-      ),
+      appBar: AppBar(title: const Text('KindKnock')),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('help_requests')
@@ -97,11 +99,24 @@ class HomeScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Chip(
-                          label: Text(data['status'] ?? 'open'),
-                          backgroundColor: data['status'] == 'open'
-                              ? Colors.blue
-                              : Colors.green,
+                        GestureDetector(
+                          onTap: () async {
+                            final newStatus = data['status'] == 'open'
+                                ? 'accepted'
+                                : 'completed';
+                            await FirebaseFirestore.instance
+                                .collection('help_requests')
+                                .doc(req.id)
+                                .update({'status': newStatus});
+                          },
+                          child: Chip(
+                            label: Text(
+                              '${data['status'] ?? 'open'} • ${_formatTime(data['created_at'])}',
+                            ),
+                            backgroundColor: data['status'] == 'open'
+                                ? Colors.blue
+                                : Colors.green,
+                          ),
                         ),
                       ],
                     ),
@@ -115,9 +130,7 @@ class HomeScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => const CreateRequestScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => const CreateRequestScreen()),
           );
         },
         child: const Icon(Icons.add),
