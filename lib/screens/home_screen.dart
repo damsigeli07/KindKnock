@@ -35,59 +35,76 @@ class HomeScreen extends StatelessWidget {
               final req = requests[index];
               final data = req.data() as Map<String, dynamic>;
 
-              return Card(
-                margin: const EdgeInsets.all(8),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  data['title'] ?? 'Help Request',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+              return GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text(data['title'] ?? 'Help Request'),
+                      content: Text(data['description'] ?? ''),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: Card(
+                  margin: const EdgeInsets.all(8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    data['title'] ?? 'Help Request',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  data['description'] ?? '',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    data['description'] ?? '',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () async {
-                              await FirebaseFirestore.instance
-                                  .collection('help_requests')
-                                  .doc(req.id)
-                                  .delete();
-                            },
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Chip(
-                        label: Text(data['status'] ?? 'open'),
-                        backgroundColor: data['status'] == 'open'
-                            ? Colors.blue
-                            : Colors.green,
-                      ),
-                    ],
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () async {
+                                await FirebaseFirestore.instance
+                                    .collection('help_requests')
+                                    .doc(req.id)
+                                    .delete();
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Chip(
+                          label: Text(data['status'] ?? 'open'),
+                          backgroundColor: data['status'] == 'open'
+                              ? Colors.blue
+                              : Colors.green,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
